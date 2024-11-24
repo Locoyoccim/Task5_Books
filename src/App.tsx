@@ -11,10 +11,14 @@ import { useEffect, useState } from "react";
 import { Book, getProps } from "./interface";
 import Loading from "./components/loaders/Loading";
 import BookDetails from "./components/book_details/BookDetails";
+import CardBook from "./components/carView/CardBook";
+import ChangeMode from "./components/chengeButton/ChangeMode";
+import ExportCSV from "./components/exportCSV/ExportCSV";
 
 function App() {
     const [bookList, setBookList] = useState<Book[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [ListMode, setListMode] = useState<boolean>(true);
     const [review, setReview] = useState<string>("0");
     const [getParams, setGetParams] = useState<getProps>({
         quantity: "25",
@@ -83,7 +87,7 @@ function App() {
     };
 
     const handleReviews = () => {
-        const listCount = bookList.length; 
+        const listCount = bookList.length;
         const sumList = bookList.reduce(
             (acc, item) => acc + parseFloat(item.likes),
             0
@@ -91,7 +95,7 @@ function App() {
 
         const result = listCount > 0 ? sumList / listCount : 0;
 
-        setReview(result.toFixed(1)); 
+        setReview(result.toFixed(1));
     };
 
     useEffect(() => {
@@ -100,6 +104,7 @@ function App() {
 
     useEffect(() => {
         handleReviews();
+        if (bookList.length == 0) GetBook(getParams);
     }, [bookList]);
 
     return (
@@ -109,6 +114,8 @@ function App() {
                 <Seed HandleChange={HandleChange} />
                 <LikeSlider handleLikes={handleLikes} />
                 <Review value={review} />
+                <ChangeMode setListMode={setListMode} listMode={ListMode} />
+                <ExportCSV books={bookList}/>
             </nav>
             <InfiniteScroll
                 dataLength={bookList.length}
@@ -117,28 +124,37 @@ function App() {
                 loader={<Loading />}
                 endMessage={<p>No more books to load</p>}
             >
-                <section id="book_render" className="px-3 table-responsive">
-                    <table className="table ">
-                        <thead>
-                            <tr>
-                                <th scope="col" style={{ width: 10 }}></th>
-                                <th scope="col">#</th>
-                                <th scope="col">ISBN</th>
-                                <th scope="col">Title</th>
-                                <th scope="col">Author(s)</th>
-                                <th scope="col">Publisher</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bookList.map((item, index) => (
-                                <BookDetails
-                                    key={index + 1}
-                                    {...item}
-                                    index={index}
-                                />
-                            ))}
-                        </tbody>
-                    </table>
+                <section
+                    id="book_render"
+                    className="px-3 table-responsive d-flex flex-wrap gap-4 justify-content-center"
+                >
+                    {!ListMode ? (
+                        bookList.map((item, index) => (
+                            <CardBook key={index + 1} {...item} index={index} />
+                        ))
+                    ) : (
+                        <table className="table ">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style={{ width: 10 }}></th>
+                                    <th scope="col">#</th>
+                                    <th scope="col">ISBN</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Author(s)</th>
+                                    <th scope="col">Publisher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {bookList.map((item, index) => (
+                                    <BookDetails
+                                        key={index + 1}
+                                        {...item}
+                                        index={index}
+                                    />
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </section>
             </InfiniteScroll>
         </>

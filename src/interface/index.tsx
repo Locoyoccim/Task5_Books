@@ -9,11 +9,11 @@ export interface Book {
     publisher: string;
     title: string;
     index?: number;
-    likes: string
+    likes: string;
 }
 
 export interface HandleChange {
-    HandleChange: (name: string, value:string) => void;
+    HandleChange: (name: string, value: string) => void;
 }
 
 export interface handleLikes {
@@ -34,5 +34,10 @@ export interface getProps {
 }
 
 export interface reviewValue {
-    value: string
+    value: string;
+}
+
+export interface ChangeModeProps {
+    setListMode: (mode: boolean) => void;
+    listMode: boolean;
 }
