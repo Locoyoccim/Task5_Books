@@ -4,7 +4,6 @@ function BookDetails({
     author,
     description,
     genre,
-    id,
     isbn,
     published,
     publisher,
@@ -25,9 +24,9 @@ function BookDetails({
                 key={index}
                 role="button"
                 data-bs-toggle="collapse"
-                data-bs-target={`#collapse${id}`}
+                data-bs-target={`#collapse${index}`}
                 aria-expanded="false"
-                aria-controls={`collapse${id}`}
+                aria-controls={`collapse${index}`}
             >
                 <th scope="row">{UpArrow}</th>
                 <th>{index + 1}</th>
@@ -40,7 +39,7 @@ function BookDetails({
             </tr>
             <tr>
                 <td colSpan={6} className="p-0">
-                    <div className="collapse" id={`collapse${id}`}>
+                    <div className="collapse" id={`collapse${index}`}>
                         <div className="card card-body d-flex flex-row gap-3 p-3">
                             <div>
                                 <img

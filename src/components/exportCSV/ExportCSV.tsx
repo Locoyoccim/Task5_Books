@@ -17,7 +17,7 @@ function ExportCSV({ books }: { books: Book[] }) {
                 data={books}
                 headers={headers}
                 filename="booksList.csv"
-                className="btn btn-success"
+                className="btn btn-outline-success"
             >
                 <i className="bi bi-file-earmark-arrow-down-fill"></i>
             </CSVLink>
