@@ -1,14 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { handleLikes } from "../../interface";
 
 function LikeSlider({ handleLikes }: handleLikes) {
     const [likes, setLikes] = useState<string>("0");
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setLikes(value);
-        handleLikes(value);
-    };
+    useEffect(() =>{
+        handleLikes(likes)
+    },[likes])
 
     return (
         <>
@@ -19,10 +17,10 @@ function LikeSlider({ handleLikes }: handleLikes) {
                 type="range"
                 className="form-range"
                 min="0"
-                max="5"
+                max="10"
                 id="customRange2"
                 value={likes}
-                onChange={handleChange}
+                onChange={(e) => {setLikes(e.target.value)}}
             />
         </>
     );

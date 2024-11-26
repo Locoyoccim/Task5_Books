@@ -1,6 +1,13 @@
-import { reviewValue } from "../../interface";
+import { useEffect, useState } from "react";
+import { handleReviews } from "../../interface";
 
-function Review({value}: reviewValue) {
+function Review({ filterReviews }: handleReviews) {
+    const [value, setValue] = useState<string>("");
+
+    useEffect(() => {
+        filterReviews(value);
+    }, [value]);
+
     return (
         <>
             <div className="input-group flex-nowrap">
@@ -11,6 +18,7 @@ function Review({value}: reviewValue) {
                     aria-label="Review"
                     aria-describedby="addon-wrapping"
                     value={value}
+                    onChange={(e) => setValue(e.target.value)}
                 />
             </div>
         </>

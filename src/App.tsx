@@ -6,77 +6,50 @@ import LanguageSelect from "./components/languageSelect/LanguageSelect";
 import Seed from "./components/seed/Seed";
 import LikeSlider from "./components/slider/LikeSlider";
 import Review from "./components/review/Review";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Book, getProps } from "./interface";
 import Loading from "./components/loaders/Loading";
-import BookDetails from "./components/book_details/BookDetails";
 import CardBook from "./components/carView/CardBook";
 import ChangeMode from "./components/chengeButton/ChangeMode";
 import ExportCSV from "./components/exportCSV/ExportCSV";
+import useBooks from "./hooks/useBooks";
+import useFilter from "./hooks/useFilter";
+import TableBook from "./components/book_details/TableBook";
 
 function App() {
-    const [bookList, setBookList] = useState<Book[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
     const [ListMode, setListMode] = useState<boolean>(true);
-    const [review, setReview] = useState<string>("0");
     const [getParams, setGetParams] = useState<getProps>({
         quantity: "25",
         language: "en_EN",
         seed: "0",
         likes: "0",
+        avgReview: "",
     });
-    console.log(bookList);
+    const { booksList, fetchMoreBooks } = useBooks(getParams);
+    const [bookList, setBookList] = useState<Book[]>([]);
+    const { handleLikes, handleReviews, filteredList } = useFilter(booksList);
 
-    const GetBook = (props: getProps) => {
-        setLoading(true);
-        axios
-            .get(
-                `https://fakerapi.it/api/v2/books?_locale=${props.language}&_quantity=${props.quantity}&_seed=${props.seed}`
-            )
-            .then((response) => {
-                const booksWithDefaults = response.data.data.map(
-                    (book: Book) => ({
+    useEffect(() => {
+        setBookList(booksList);
+    }, [booksList]);
+
+    useEffect(() => {
+        setBookList(filteredList);
+    }, [filteredList]);
+
+    const addNewReview = (reviews: string, user: string, bookId: number) => {
+        setBookList((prevState) => {
+            const newBookList = prevState.map((book) => {
+                if (book.id === bookId) {
+                    return {
                         ...book,
-                        likes: Math.floor(Math.random() * 6).toString(),
-                        reviews: "esta es una review",
-                    })
-                );
-                setBookList(booksWithDefaults);
-                console.log(response.data);
-            })
-            .catch((error) => {
-                console.error(error);
-            })
-            .finally(() => {
-                setLoading(false);
+                        reviews: [...book.reviews, { reviews, user }],
+                    };
+                }
+                return book;
             });
-    };
-
-    const fetchMoreBooks = async (props: getProps) => {
-        if (loading) return;
-
-        await axios
-            .get(
-                `https://fakerapi.it/api/v2/books?_locale=${props.language}&_quantity=10&_seed=${props.seed}`
-            )
-            .then((response) => {
-                const booksWithDefaults = response.data.data.map(
-                    (book: Book) => ({
-                        ...book,
-                        likes: Math.floor(Math.random() * 6).toString(),
-                        reviews: "esta es una review",
-                    })
-                );
-                setTimeout(() => {
-                    setBookList([...bookList, ...booksWithDefaults]);
-                }, 1500);
-            });
-    };
-
-    const handleLikes = (n: string) => {
-        const likesList = bookList.filter((item) => item.likes == n);
-        setBookList(likesList);
+            return newBookList;
+        });
     };
 
     const HandleChange = (name: string, value: string) => {
@@ -86,36 +59,15 @@ function App() {
         }));
     };
 
-    const handleReviews = () => {
-        const listCount = bookList.length;
-        const sumList = bookList.reduce(
-            (acc, item) => acc + parseFloat(item.likes),
-            0
-        );
-
-        const result = listCount > 0 ? sumList / listCount : 0;
-
-        setReview(result.toFixed(1));
-    };
-
-    useEffect(() => {
-        GetBook(getParams);
-    }, [getParams]);
-
-    useEffect(() => {
-        handleReviews();
-        if (bookList.length == 0) GetBook(getParams);
-    }, [bookList]);
-
     return (
         <>
             <nav className="d-grid gap-2 d-md-flex align-items-center gap-md-4 bg-secondary bg-opacity-25 p-4">
                 <LanguageSelect HandleChange={HandleChange} />
                 <Seed HandleChange={HandleChange} />
                 <LikeSlider handleLikes={handleLikes} />
-                <Review value={review} />
+                <Review filterReviews={handleReviews} />
                 <ChangeMode setListMode={setListMode} listMode={ListMode} />
-                <ExportCSV books={bookList}/>
+                <ExportCSV books={bookList} />
             </nav>
             <InfiniteScroll
                 dataLength={bookList.length}
@@ -133,27 +85,10 @@ function App() {
                             <CardBook key={index + 1} {...item} index={index} />
                         ))
                     ) : (
-                        <table className="table ">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style={{ width: 10 }}></th>
-                                    <th scope="col">#</th>
-                                    <th scope="col">ISBN</th>
-                                    <th scope="col">Title</th>
-                                    <th scope="col">Author(s)</th>
-                                    <th scope="col">Publisher</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {bookList.map((item, index) => (
-                                    <BookDetails
-                                        key={index + 1}
-                                        {...item}
-                                        index={index}
-                                    />
-                                ))}
-                            </tbody>
-                        </table>
+                        <TableBook
+                            bookList={bookList}
+                            addNewReview={addNewReview}
+                        />
                     )}
                 </section>
             </InfiniteScroll>

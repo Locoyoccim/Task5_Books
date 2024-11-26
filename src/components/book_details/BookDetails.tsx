@@ -1,8 +1,10 @@
+import { useRef } from "react";
 import { Book } from "../../interface";
 
 function BookDetails({
     author,
     description,
+    id,
     genre,
     isbn,
     published,
@@ -10,12 +12,25 @@ function BookDetails({
     title,
     index,
     likes,
+    reviews,
+    addNewReview,
 }: Book & { index: number }) {
     const UpArrow = <i className="bi bi-caret-up"></i>;
+    const reviewRef = useRef<HTMLTextAreaElement | null>(null);
+    const userRef = useRef<HTMLInputElement | null>(null);
 
     const getYear = (date: string) => {
         const year = date.split("-")[0];
         return year;
+    };
+
+    const sendReview = () => {
+        const review = reviewRef.current?.value;
+        const user = userRef.current?.value;
+
+        if (review && user) addNewReview(review, user, id);
+        if (reviewRef.current) reviewRef.current.value = "";
+        if (userRef.current) userRef.current.value = "";
     };
 
     return (
@@ -49,18 +64,18 @@ function BookDetails({
                                     alt={title}
                                     style={{ width: "150px" }}
                                 />
-                               
                             </div>
                             <div>
                                 <div className="d-flex align-items-center gap-2">
                                     <h2 className="mb-2">{title}</h2>
-                                     <div
-                                    className="text-center bg-primary rounded-5 text-bg-primary "
-                                    style={{ width: 60, height: 25}}
-                                >
-                                    {likes}{" "}
-                                    <i className="bi bi-hand-thumbs-up-fill"></i>
-                                </div>
+                                    <div
+                                        role="button"
+                                        className="text-center bg-primary rounded-5 text-bg-primary "
+                                        style={{ width: 60, height: 25 }}
+                                    >
+                                        {likes}{" "}
+                                        <i className="bi bi-hand-thumbs-up-fill"></i>
+                                    </div>
                                 </div>
                                 <h4>by {author}</h4>
                                 <p className="opacity-50 m-0 p-0">
@@ -73,6 +88,50 @@ function BookDetails({
                                 <p className="mb-0">
                                     <strong>Genre:</strong> {genre}
                                 </p>
+                                <h4 className="mt-3">Reviews:</h4>
+                                {reviews.map((review, index) => (
+                                    <div key={index} className="mb-3">
+                                        <div>
+                                            <p className="m-0 p-0">
+                                                {review.reviews}
+                                            </p>
+                                            <p className="m-0 p-0 text-secondary">
+                                                --- {review.user}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="newReview">
+                                    <div className="input-group">
+                                        <span className="input-group-text">
+                                            Your Review
+                                        </span>
+                                        <textarea
+                                            className="form-control"
+                                            aria-label="With textarea"
+                                            style={{ resize: "none" }}
+                                            ref={reviewRef}
+                                        ></textarea>
+                                        <div className="input-group mt-3">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Username"
+                                                aria-label="Username"
+                                                aria-describedby="button-addon2"
+                                                ref={userRef}
+                                            />
+                                            <button
+                                                className="btn btn-outline-success"
+                                                type="button"
+                                                id="button-addon2"
+                                                onClick={sendReview}
+                                            >
+                                                Submit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
